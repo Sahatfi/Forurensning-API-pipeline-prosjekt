@@ -1,0 +1,12 @@
+[project]
+name = "forurensning-pipeline"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=3.0.1",
+    "path>=17.1.1",
+    "pyyaml>=6.0.3",
+    "requests>=2.32.5",
+]
