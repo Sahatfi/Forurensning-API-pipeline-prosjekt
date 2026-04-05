@@ -73,26 +73,33 @@ class Data(BaseModel):
     geometry : Geometry
     properties : Properties
 #__________________________
+#class ForurensningsVariables(BaseModel):
+     # Dataset -> data -> "location-> time -> variables -> 
+
+
 class ForurensningsTimeseries(BaseModel):
-    Optional
+     # Dataset -> data -> "location-> time -> (from', 'to', 'variables', 'reason')
+    variables : Optional[str]
     
 
 
 class ForurensningsData(BaseModel):
+    # Dataset -> data -> location -> (time)
     time : list[ForurensningsTimeseries]
 
 class  ForurensningsLokasjon(BaseModel):
-    # data -> meta ->(location)
+    # dataset -> meta ->(location)
     longitude : float
     latitude : float
 
+
 class ForurensningsSuperLokasjon(BaseModel):
-    # data -> meta ->(superlocation)
+    # dataset -> meta ->(superlocation)
     name : str
     
 
 class  ForurensningsMeta(BaseModel):
-# data -> meta ->(superlocation + location)
+# dataset -> meta ->(superlocation + location)
     superlocation: ForurensningsSuperLokasjon
     location : ForurensningsLokasjon
 
