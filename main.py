@@ -39,13 +39,15 @@ except:
     
 e = forurensning_data["data"]["time"]
 for i in e:
-    print(i.keys())
-print(forurensning_data["meta"]["location"].keys())
+    print("CUT HERE------------------------------------------------------------------")
+    for variable in i["variables"]:
+        print(i)
 
-x = ForurensningsModel(**forurensning_data)
-a,b,c = x.meta.location.latitude, x.meta.location.longitude, x.meta.superlocation
-print(a,b,c)
-a = x.meta.location.latitude
 
-    
+for i in e:
+    print(i)
+
+
+
+
 
