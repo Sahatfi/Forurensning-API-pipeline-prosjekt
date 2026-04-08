@@ -35,5 +35,5 @@ This project is part of a structured roadmap to move from data analysis to produ
 - Automated reporting
   
 **Data available at:**  
-https://api.met.no/weatherapi/airqualityforecast/0.1/documentation for Air Quality and https://api.met.no/weatherapi/airqualityforecast/0.1/documentationOpenAQ for weather.
+https://api.met.no/weatherapi/airqualityforecast/0.1/documentation for Air Quality andhttps://api.met.no/weatherapi/airqualityforecast/0.1/documentationOpenAQ for weather.
 The project is inspired by my volunteer work at the Red Cross. The goal is to build a data pipeline that can automate parts of the reporting.
