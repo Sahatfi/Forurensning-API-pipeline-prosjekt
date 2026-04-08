@@ -38,3 +38,9 @@ g = ax.data.time[6].from_
 print(e)
 print(g)
 print("Is it true that code is correct? This statement is ", e == g)
+print(fx["meta"].keys())
+print(fx["meta"]["superlocation"].keys())
+print(fx["data"]["time"][5]["variables"].keys())
+test = fx["data"]["time"][5]["variables"]["no2_local_fraction_traffic_exhaust"]["value"]
+passed = ax.data.time[5].variables.no2_local_fraction_traffic_exhaust.value
+print(test, passed, "Test passed")
