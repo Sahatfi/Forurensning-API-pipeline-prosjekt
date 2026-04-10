@@ -16,7 +16,7 @@ Dette prosjektet er en del av en strukturert plan for å gå fra dataanalyse til
 - Datavalidering med Pydantic Modulær pipeline-arkitektur
 
 **Data tilgjengelig på:**  
-https://api.met.no/weatherapi/airqualityforecast/0.1/documentation for Luftkvalitet  og https://api.met.no/weatherapi/locationforecast/2.0/documentationfor vær.
+https://api.met.no/weatherapi/airqualityforecast/0.1/documentation for Luftkvalitet  og https://api.met.no/weatherapi/locationforecast/2.0/documentation for vær.
 Prosjektet er inspirert av mitt frivillige arbeid i Røde Kors. Målet er å bygge en datapipeline som kan automatisere deler av rapporteringsarbeidet.
 ______________________________________________________________________________________________________
 **Work in Progress (Phase 3/5)**

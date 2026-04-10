@@ -144,6 +144,6 @@ class ForurensningsModel(BaseModel):
     meta : ForurensningsMeta | None = None
     data : ForurensningsData | None = None
 
-
-
+x= "Hellou Rebekka"
+print(x)
 

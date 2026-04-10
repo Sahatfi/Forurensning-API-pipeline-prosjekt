@@ -31,9 +31,8 @@ def param_config_forurensning(config):
     headers = config["api2"]["headers"]
     return url , params, headers
 
-
-@retry(stop=stop_after_attempt(5),wait=wait_exponential(multiplier=1, min=4, max=10),reraise=True)
 # Forurensning loader  
+@retry(stop=stop_after_attempt(5),wait=wait_exponential(multiplier=1, min=4, max=10),reraise=True)
 def forurensning_loading(url, headers, params):
     response_forurensning = requests.get(url=url, headers = headers, params=params)
     response_forurensning.raise_for_status()
