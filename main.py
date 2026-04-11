@@ -4,3 +4,4 @@ if __name__ == "__main__":
     
     # Vi kaller på funksjonen over
     resultater = run_pipeline()
+    

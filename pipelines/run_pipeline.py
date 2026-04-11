@@ -16,11 +16,14 @@ def run_pipeline():
         print("Data hentet suksessfullt!")
     except requests.exceptions.RequestException as e:
         print("Kunne ikke hente data etter 5 forsøk. Feilmelding:", e)
+        return None
 
     # Konverter til BaseModel
     try :
         vær_data_basemodel = Data(**vær_data)  
-    except: print("failed")
+    except Exception as e:
+        print("Validering feilet", e)
+        return None
 
     #Adjusting for parameters for data loading for forurensning
     url_foruransning, params_forurensning, headers_forurensning = param_config_forurensning(config)

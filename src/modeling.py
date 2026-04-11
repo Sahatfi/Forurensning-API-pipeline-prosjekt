@@ -133,7 +133,7 @@ class ForurensningsLokasjon(BaseModel):
     # dataset -> meta -> location (['name', 'path', 'areacode', 'longitude', 'latitude', 'areaclass', 'superareacode']))
     name : str
     longitude : float | None = None
-    latutude : float | None = None
+    latitude : float | None = None
     
 
 class  ForurensningsMeta(BaseModel):
@@ -143,7 +143,3 @@ class  ForurensningsMeta(BaseModel):
 class ForurensningsModel(BaseModel):
     meta : ForurensningsMeta | None = None
     data : ForurensningsData | None = None
-
-x= "Hellou Rebekka"
-print(x)
-
