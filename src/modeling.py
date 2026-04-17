@@ -4,15 +4,15 @@ from typing import Optional, List, Dict, Any
 class Details(BaseModel):
     # Data -> Properties -> Timeseries_Attributes -> Weatherdata -> Instant -> Details -> (data below)
     air_pressure_at_sea_level : float | None = None
-    air_temperature : float | None = None
+    air_temperature : float 
     cloud_area_fraction : float | None = None
-    relative_humidity : float | None = None
-    wind_from_direction : float | None = None
-    wind_speed : float | None = None
+    relative_humidity : float 
+    wind_from_direction : float 
+    wind_speed : float 
 
 class Instant(BaseModel):
     #Data -> Properties -> Timeseries_Attributes -> Weatherdata -> Instant -> (Details)
-    details : Details | None = None
+    details : Details
 
 class Summary(BaseModel):
     #Data -> Properties -> Timeseries_Attributes -> Weatherdata -> next 12 hrs -> Summary -> (symbol code)
@@ -22,12 +22,12 @@ class Next12Hrs(BaseModel):
     summary : Summary | None = None
 class Weatherdata(BaseModel):
     #Data -> Properties -> Timeseries_Attributes -> Weatherdata ->(instant + next 12 hrs)
-    instant : Instant | None = None
+    instant : Instant 
     next_12_hours : Next12Hrs | None = None
 
 class Timeseries_Attributes(BaseModel):
     #Data -> Properties -> Timeseries_Attributes-> (time + data)
-    time: str | None = None
+    time: str | None = None                                       
     data: Weatherdata | None = None
 
 class Units(BaseModel):
@@ -41,24 +41,24 @@ class Units(BaseModel):
 
 class Meta(BaseModel):
     #Data -> Properties -> Meta (updated_at + units)
-    updated_at: str | None = None
-    units: Units | None = None
+    updated_at: str               #VIKTIG    
+    units: Units                  #VIKTIG 
 
 class Properties(BaseModel):
     #Data -> Properties -> (meta + timeseries)
-    meta: Meta | None = None
-    timeseries: list[Timeseries_Attributes] | None = None
+    meta: Meta 
+    timeseries: list[Timeseries_Attributes]
 
 class Coordinates(BaseModel):
     #Geometry -> coordinates -> [lon, lat, alt]
-    lon : float | None = None
-    lat : float | None = None
+    lon : float 
+    lat : float 
     alt : float | None = None
     
 class Geometry(BaseModel):
     #Geometry -> (type + coordinates)
     type: str | None = None
-    coordinates : Coordinates | None = None
+    coordinates : Coordinates 
     @field_validator("coordinates", mode="before")
     @classmethod
     def parse_list(cls, v):
@@ -69,9 +69,9 @@ class Geometry(BaseModel):
         return v
     
 class Data(BaseModel):
-    type : str | None = None
-    geometry : Geometry | None = None
-    properties : Properties | None = None
+    type : str 
+    geometry : Geometry 
+    properties : Properties 
 #__________________________
 class Measurement(BaseModel):
     value : float | None = None
@@ -143,3 +143,5 @@ class  ForurensningsMeta(BaseModel):
 class ForurensningsModel(BaseModel):
     meta : ForurensningsMeta | None = None
     data : ForurensningsData | None = None
+
+

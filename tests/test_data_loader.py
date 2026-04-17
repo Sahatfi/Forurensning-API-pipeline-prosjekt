@@ -1,6 +1,11 @@
 
 import pytest
-from src.data_loader import load_config, param_config_forecast
+from src.data_loader import load_config, param_config_forecast, load_data
+from unittest.mock import MagicMock
+import responses
+import requests
+from requests.exceptions import HTTPError
+from unittest.mock import patch, Mock
 
 #Test av config path
 def test_load_config_returns_dict():
@@ -21,3 +26,20 @@ def test_param_config_forecast_returns_correct_values():
     assert params == {"lat" : 5, "lon": 10}
 
 
+# data loading
+
+@responses.activate
+def test_load_data_failure():
+    url = "http://test.com"
+    responses.add("GET", url, status=500)
+    with pytest.raises(requests.exceptions.HTTPError):
+        load_data(url, {}, {})
+
+@responses.activate
+def test_load_data_success():
+    url = "http://test.com"
+    responses.add( "GET", url, json={"ok": True}, status=200)
+    result = load_data(url, {}, {})
+    assert result == {"ok": True}
+    
+# python -m pytest tests/test_data_loader.py
