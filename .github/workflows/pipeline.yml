@@ -11,7 +11,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-          
+
+      - name: Create config file
+        run: |
+          mkdir -p config
+          cat << 'EOF' > config/config.yaml
+${{ secrets.CONFIG_YAML }}
+EOF
+        
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
