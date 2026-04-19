@@ -5,15 +5,11 @@
 Dette prosjektet er en del av en strukturert plan for å gå fra dataanalyse til produksjonsklare datasystemer.  
 
 **Nåværende fokus**:  
-- API-innhenting fra norsk meteorologisk institutt
-- Datavalidering med Pydantic
-- Modulær pipeline-arkitektur
 
-**Neste steg:**
 - CI/CD-automatisering (GitHub Actions)  
 - Planlagte pipelines  
-- Automatisert rapportering  
-- Datavalidering med Pydantic Modulær pipeline-arkitektur
+- Automatisert rapportering
+- Testing
 
 **Data tilgjengelig på:**  
 https://api.met.no/weatherapi/airqualityforecast/0.1/documentation for Luftkvalitet  og https://api.met.no/weatherapi/locationforecast/2.0/documentation for vær.
@@ -25,14 +21,11 @@ ________________________________________________________________________________
 This project is part of a structured roadmap to move from data analysis to production-ready data systems.  
 
 **Current focus:**
-- API ingestion from MET Norway
-- Data validation using Pydantic
-- Modular pipeline architecture
- 
-**Next steps:**
+
 - CI/CD automation (GitHub Actions)
 - Scheduled pipelines
 - Automated reporting
+- Testing
   
 **Data available at:**  
 https://api.met.no/weatherapi/airqualityforecast/0.1/documentation for Air Quality and https://api.met.no/weatherapi/locationforecast/2.0/documentation for weather.
