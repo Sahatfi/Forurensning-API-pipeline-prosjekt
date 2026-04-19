@@ -29,12 +29,6 @@ jobs:
           uv run python main.py
 
         
-jobs: → nivå 0
-run-pipeline: → +2 spaces
-runs-on: → +4 spaces
-steps: → +4 spaces
-- name: → +6 spaces
-run: → +8 spaces
     
 
     
