@@ -48,3 +48,4 @@ def run_pipeline():
     except Exception as e: 
         print(f"Unexpected error validating forurensning data: {e}")
         return None
+    return vær_data, vær_data_basemodel, forurensnings_data, forurensnings_data_basemodel
