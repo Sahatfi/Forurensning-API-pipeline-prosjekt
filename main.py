@@ -4,7 +4,7 @@ if __name__ == "__main__":
     
     # Vi kaller på funksjonen over
     resultater = run_pipeline()
-    vær_data, vær_model, forurensnings_data, air_model, _ = resultater
+    vær_data, vær_model, forurensnings_data, air_model, = resultater
     
 
     

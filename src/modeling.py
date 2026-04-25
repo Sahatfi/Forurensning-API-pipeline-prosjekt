@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from typing import Optional, List, Dict, Any
+from datetime import datetime
 
 class Details(BaseModel):
     # Data -> Properties -> Timeseries_Attributes -> Weatherdata -> Instant -> Details -> (data below)
@@ -120,7 +121,7 @@ class ForurensningsVariables(BaseModel):
 class ForurensningsTimeseries(BaseModel):
      # Dataset -> data -> "-> time -> (from', 'to', 'variables', 'reason')
     #setter from_ som key siden from er reservert
-    from_: Optional[str] = Field(default=None, alias="from")
+    from_: datetime = Field(default=None, alias="from")
     variables : ForurensningsVariables| None = None
 
 
@@ -131,7 +132,8 @@ class ForurensningsData(BaseModel):
 
 class ForurensningsLokasjon(BaseModel):
     # dataset -> meta -> location (['name', 'path', 'areacode', 'longitude', 'latitude', 'areaclass', 'superareacode']))
-    name : str
+    path : str
+    name : str | None = None
     longitude : float | None = None
     latitude : float | None = None
     

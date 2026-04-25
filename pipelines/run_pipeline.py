@@ -19,7 +19,7 @@ def run_pipeline():
         print("Kunne ikke hente værdata etter 5 forsøk. Feilmelding:", e)
         return None
 
-    # Konverter til BaseModel
+    # Konverter vær til BaseModel
     try :
         vær_data_basemodel = Data(**vær_data)  
         print("Vær data validated successfully")
@@ -39,6 +39,7 @@ def run_pipeline():
         print("Kunne ikke hente forurensningsdatadata etter 5 forsøk. Feilmelding:", e)
         return None
 
+    # Konverter vær til BaseMode
     try:
         forurensnings_data_basemodel = ForurensningsModel(**forurensnings_data)
         print("Forurensningsdata validated successfully")
@@ -48,4 +49,21 @@ def run_pipeline():
     except Exception as e: 
         print(f"Unexpected error validating forurensning data: {e}")
         return None
+    
+    #validating location
+    #Long og Lat forurensning
+    latitude_vær = vær_data_basemodel.geometry.coordinates.lat
+    longitude_vær = vær_data_basemodel.geometry.coordinates.lon
+    # Long og Lat forurensning
+    latitude_forurensning = forurensnings_data_basemodel.meta.location.latitude
+    longitude_forurensning = forurensnings_data_basemodel.meta.location.longitude
+    #Definerer differens
+    lat_diff = abs(latitude_vær - latitude_forurensning)
+    lon_diff = abs(longitude_vær - longitude_forurensning)
+    if lat_diff > 0.05 or lon_diff > 0.05:
+        raise ValueError(f"Koordinasjoner er ikke de samme! Vær vs Forurensnings long{longitude_vær} vs{longitude_forurensning},Vær vs Forurensnings lat {latitude_vær}{latitude_forurensning}")
+    print("Koordinasjoner samsvarer!")
+   
+
+
     return vær_data, vær_data_basemodel, forurensnings_data, forurensnings_data_basemodel
