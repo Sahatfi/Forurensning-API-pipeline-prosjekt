@@ -1,27 +1,21 @@
-import sys
-import os
+
 import pandas as pd
-sys.path.insert(0, os.getcwd())
-from pipelines.run_pipeline import run_pipeline
 
-vær_json, vær_valid, forurensning_json, forurensning_valid = run_pipeline()
-print(vær_json.keys())
-
-#Trekke ut  navn på lokasjon latitude og longitude fra forurensning
-
-#date
-date_forurensning = forurensning_valid.data.time[1].from_
-#Trekke ut latitude og longitude fra vær data
-latitude_vær = vær_valid.geometry.coordinates.lat
-longitude_vær = vær_valid.geometry.coordinates.lon
-
+def process_weather_data(vær_valid):
+    vær_df = pd.DataFrame({'timestamp_vær' : [vær_valid.properties.timeseries[10].time],
+                       'latitude_vær' :[vær_valid.geometry.coordinates.lat],
+                       'longitude_vær': [vær_valid.geometry.coordinates.lon],
+                       'air_pressure_at_sea_level': [vær_valid.properties.timeseries[10].data.instant.details.air_pressure_at_sea_level],
+                       'air_temperature': [vær_valid.properties.timeseries[10].data.instant.details.air_temperature],
+                       'cloud_area_fraction':  [vær_valid.properties.timeseries[10].data.instant.details.cloud_area_fraction],
+                       'relative_humidity' : [vær_valid.properties.timeseries[10].data.instant.details.relative_humidity],
+                       'wind_from_direction': [vær_valid.properties.timeseries[10].data.instant.details.wind_from_direction],
+                       'wind_speed': [vær_valid.properties.timeseries[10].data.instant.details.wind_speed]})
+    return(vær_df)
 #Forurensning dataframe
-#pd.DataFrame({
-        #'timestamp': [datetime.now()],
-       # 'latitude': [air_model.meta.location.latitude],
-       #'timestamp': [pd.to_datetime(air_model.data.time[1].from_)]
 
-forurensning_df = pd.DataFrame({'timestamp_for' : [forurensning_valid.data.time[10].from_],
+def process_airquality_data(forurensning_valid)
+    forurensning_df = pd.DataFrame({'timestamp_for' : [forurensning_valid.data.time[10].from_],
                                 'latitude_for': [forurensning_valid.meta.location.latitude],
                                 'longitude_for': [forurensning_valid.meta.location.longitude],
                                 'stednavn' : [forurensning_valid.meta.location.path],
@@ -68,27 +62,11 @@ forurensning_df = pd.DataFrame({'timestamp_for' : [forurensning_valid.data.time[
                                 'o3_local_fraction_traffic_nonexhaust': [forurensning_valid.data.time[10].variables.o3_local_fraction_traffic_nonexhaust.value],
                                 'o3_local_fraction_shipping': [forurensning_valid.data.time[10].variables.o3_local_fraction_shipping.value],
                                 'o3_local_fraction_heating': [forurensning_valid.data.time[10].variables.o3_local_fraction_heating.value],
-                                'o3_local_fraction_industry': [forurensning_valid.data.time[10].variables.o3_local_fraction_industry.value],
+                                'o3_local_fraction_industry': [forurensning_valid.data.time[10].variables.o3_local_fraction_industry.value]
+ })
+    return(forurensning_df)
 
-                                  
-                                  })
+def merge_forecasts(vær_df ,forurensning_df)
+    df_merged = pd.merge(vær_df, forurensning_df, left_on = ['latitude_vær', 'longitude_vær'], right_on = ['latitude_for', 'longitude_for'],   how = 'left')
 
-
-vær_df = pd.DataFrame({'timestamp_vær' : [vær_valid.properties.timeseries[10].time],
-                       'latitude_vær' :[vær_valid.geometry.coordinates.lat],
-                       'longitude_vær': [vær_valid.geometry.coordinates.lon],
-                       'air_pressure_at_sea_level': [vær_valid.properties.timeseries[10].data.instant.details.air_pressure_at_sea_level],
-                       'air_temperature': [vær_valid.properties.timeseries[10].data.instant.details.air_temperature],
-                       'cloud_area_fraction':  [vær_valid.properties.timeseries[10].data.instant.details.cloud_area_fraction],
-                       'relative_humidity' : [vær_valid.properties.timeseries[10].data.instant.details.relative_humidity],
-                       'wind_from_direction': [vær_valid.properties.timeseries[10].data.instant.details.wind_from_direction],
-                       'wind_speed': [vær_valid.properties.timeseries[10].data.instant.details.wind_speed]})
-
-print(vær_df)
-print(vær_df.dtypes)
-print(vær_valid.properties.timeseries[10].data.instant.details.air_pressure_at_sea_level)
-# Check if this exists first - might be in next_1_hours or next_6_hours
-#Data -> Properties -> Units -> (units below)
-print(forurensning_df)
-print(forurensning_df.dtypes)
-e = pd.merge(vær_df, forurensning_df, left_on = ['latitude_vær', 'longitude_vær'], right_on = ['latitude_for', 'longitude_for'],   how = 'left')
+    return df_merged

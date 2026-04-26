@@ -28,7 +28,7 @@ class Weatherdata(BaseModel):
 
 class Timeseries_Attributes(BaseModel):
     #Data -> Properties -> Timeseries_Attributes-> (time + data)
-    time: str | None = None                                       
+    time: datetime                                      
     data: Weatherdata | None = None
 
 class Units(BaseModel):
@@ -80,6 +80,7 @@ class Measurement(BaseModel):
 
 class ForurensningsVariables(BaseModel):
     # Dataset -> data -> time -> variables -> 
+    #No2
     AQI : Measurement | None = None
     no2_concentration : Measurement | None = None
     AQI_no2 : Measurement | None = None
@@ -90,6 +91,7 @@ class ForurensningsVariables(BaseModel):
     no2_local_fraction_shipping : Measurement | None = None
     no2_local_fraction_heating : Measurement | None = None
     no2_local_fraction_industry : Measurement | None = None
+    #Pm10
     pm10_concentration : Measurement | None = None
     AQI_pm10 : Measurement | None = None
     pm10_nonlocal_fraction : Measurement | None = None
@@ -100,6 +102,7 @@ class ForurensningsVariables(BaseModel):
     pm10_local_fraction_heating : Measurement | None = None
     pm10_local_fraction_industry : Measurement | None = None
     pm25_concentration : Measurement | None = None
+    #Pm25
     AQI_pm25 : Measurement | None = None
     pm25_nonlocal_fraction : Measurement | None = None
     pm25_nonlocal_fraction_seasalt : Measurement | None = None

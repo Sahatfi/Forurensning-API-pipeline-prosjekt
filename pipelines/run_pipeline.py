@@ -1,5 +1,6 @@
 from src.data_loader import load_config, param_config_forecast, load_data, param_config_forurensning, forurensning_loading
 from src.modeling import Data, ForurensningsModel
+from src.data_processor import data_processor
 import json
 import requests
 from pydantic import ValidationError
@@ -21,7 +22,7 @@ def run_pipeline():
 
     # Konverter vær til BaseModel
     try :
-        vær_data_basemodel = Data(**vær_data)  
+        vær_valid = Data(**vær_data)  
         print("Vær data validated successfully")
     except ValidationError as e: 
         print(f"Vær  validation failed: {e}")
@@ -41,7 +42,7 @@ def run_pipeline():
 
     # Konverter vær til BaseMode
     try:
-        forurensnings_data_basemodel = ForurensningsModel(**forurensnings_data)
+        forurensning_valid = ForurensningsModel(**forurensnings_data)
         print("Forurensningsdata validated successfully")
     except ValidationError as e: 
         print(f"Forurensning validation failed: {e}")
@@ -52,18 +53,19 @@ def run_pipeline():
     
     #validating location
     #Long og Lat forurensning
-    latitude_vær = vær_data_basemodel.geometry.coordinates.lat
-    longitude_vær = vær_data_basemodel.geometry.coordinates.lon
+    latitude_vær = vær_valid.geometry.coordinates.lat
+    longitude_vær = vær_valid.geometry.coordinates.lon
     # Long og Lat forurensning
-    latitude_forurensning = forurensnings_data_basemodel.meta.location.latitude
-    longitude_forurensning = forurensnings_data_basemodel.meta.location.longitude
+    latitude_forurensning = forurensning_valid.meta.location.latitude
+    longitude_forurensning = forurensning_valid.meta.location.longitude
     #Definerer differens
     lat_diff = abs(latitude_vær - latitude_forurensning)
     lon_diff = abs(longitude_vær - longitude_forurensning)
     if lat_diff > 0.05 or lon_diff > 0.05:
         raise ValueError(f"Koordinasjoner er ikke de samme! Vær vs Forurensnings long{longitude_vær} vs{longitude_forurensning},Vær vs Forurensnings lat {latitude_vær}{latitude_forurensning}")
     print("Koordinasjoner samsvarer!")
-   
 
-
-    return vær_data, vær_data_basemodel, forurensnings_data, forurensnings_data_basemodel
+    # laging dataframes og merging
+    vær_df, forurensning_df, df_merged = data_processor(vær_valid, forurensning_valid)
+    print(vær_df, forurensning_df, df_merged)
+    return vær_df, forurensning_df, df_merged
