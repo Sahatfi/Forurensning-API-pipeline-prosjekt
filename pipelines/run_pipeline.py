@@ -1,6 +1,6 @@
 from src.data_loader import load_config, param_config_forecast, load_data, param_config_forurensning, forurensning_loading
 from src.modeling import Data, ForurensningsModel
-from src.data_processor import data_processor
+from src.data_processor import process_weather_data, process_airquality_data, merge_forecasts
 import json
 import requests
 from pydantic import ValidationError
@@ -65,7 +65,10 @@ def run_pipeline():
         raise ValueError(f"Koordinasjoner er ikke de samme! Vær vs Forurensnings long{longitude_vær} vs{longitude_forurensning},Vær vs Forurensnings lat {latitude_vær}{latitude_forurensning}")
     print("Koordinasjoner samsvarer!")
 
-    # laging dataframes og merging
-    vær_df, forurensning_df, df_merged = data_processor(vær_valid, forurensning_valid)
-    print(vær_df, forurensning_df, df_merged)
-    return vær_df, forurensning_df, df_merged
+    # Laging av vær dataframe:
+    vær_df = process_weather_data(vær_valid)
+    # Laging av air-quality dataframe
+    forurensning_df = process_airquality_data(forurensning_valid)
+    #Slå sammen dataframes
+    merged_df = merge_forecasts(vær_df, forurensning_df)
+    return vær_df, forurensning_df, merged_df

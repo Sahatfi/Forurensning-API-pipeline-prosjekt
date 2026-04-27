@@ -1,7 +1,9 @@
 
 import pandas as pd
+from src.modeling import ForurensningsModel, Data
 
-def process_weather_data(vær_valid):
+
+def process_weather_data(vær_valid: Data):
     vær_df = pd.DataFrame({'timestamp_vær' : [vær_valid.properties.timeseries[10].time],
                        'latitude_vær' :[vær_valid.geometry.coordinates.lat],
                        'longitude_vær': [vær_valid.geometry.coordinates.lon],
@@ -14,7 +16,7 @@ def process_weather_data(vær_valid):
     return(vær_df)
 #Forurensning dataframe
 
-def process_airquality_data(forurensning_valid)
+def process_airquality_data(forurensning_valid: ForurensningsModel):
     forurensning_df = pd.DataFrame({'timestamp_for' : [forurensning_valid.data.time[10].from_],
                                 'latitude_for': [forurensning_valid.meta.location.latitude],
                                 'longitude_for': [forurensning_valid.meta.location.longitude],
@@ -66,7 +68,7 @@ def process_airquality_data(forurensning_valid)
  })
     return(forurensning_df)
 
-def merge_forecasts(vær_df ,forurensning_df)
+def merge_forecasts(vær_df ,forurensning_df):
     df_merged = pd.merge(vær_df, forurensning_df, left_on = ['latitude_vær', 'longitude_vær'], right_on = ['latitude_for', 'longitude_for'],   how = 'left')
 
     return df_merged
