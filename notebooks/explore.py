@@ -77,3 +77,59 @@ def run_pipeline():
     merged_df = merge_forecasts(vær_df ,forurensning_df)
 
     return forurensnings_data, forurensning_valid, vær_data, vær_valid
+
+
+
+
+
+
+    for pollutant in pollutants:
+       field_value = getattr(pathname)
+        
+    
+                                #No2
+
+                                'no2_concentration': [forurensning_valid.data.time[hours_ahead].variables.no2_concentration.value],
+                                'AQI': [forurensning_valid.data.time[hours_ahead].variables.AQI.value],
+                                'AQI_no2': [forurensning_valid.data.time[hours_ahead].variables.AQI_no2.value],
+                                'no2_nonlocal_fraction': [forurensning_valid.data.time[hours_ahead].variables.no2_nonlocal_fraction.value],
+                                'no2_nonlocal_fraction_seasalt': [forurensning_valid.data.time[hours_ahead].variables.no2_nonlocal_fraction_seasalt.value],
+                                'no2_local_fraction_traffic_exhaust': [forurensning_valid.data.time[hours_ahead].variables.no2_local_fraction_traffic_exhaust.value],
+                                'no2_local_fraction_traffic_nonexhaust': [forurensning_valid.data.time[hours_ahead].variables.no2_local_fraction_traffic_nonexhaust.value],
+                                'no2_local_fraction_shipping': [forurensning_valid.data.time[hours_ahead].variables.no2_local_fraction_shipping.value],
+                                'no2_local_fraction_heating': [forurensning_valid.data.time[hours_ahead].variables.no2_local_fraction_heating.value],
+                                'no2_local_fraction_industry': [forurensning_valid.data.time[hours_ahead].variables.no2_local_fraction_industry.value],
+
+                                #pm10
+                                'pm10_concentration': [forurensning_valid.data.time[hours_ahead].variables.pm10_concentration.value],
+                                'AQI_pm10': [forurensning_valid.data.time[hours_ahead].variables.AQI_pm10.value],
+                                'pm10_nonlocal_fraction': [forurensning_valid.data.time[hours_ahead].variables.pm10_nonlocal_fraction.value],
+                                'pm10_nonlocal_fraction_seasalt': [forurensning_valid.data.time[hours_ahead].variables.pm10_nonlocal_fraction_seasalt.value],
+                                'pm10_local_fraction_traffic_exhaust': [forurensning_valid.data.time[hours_ahead].variables.pm10_local_fraction_traffic_exhaust.value],
+                                'pm10_local_fraction_traffic_nonexhaust': [forurensning_valid.data.time[hours_ahead].variables.pm10_local_fraction_traffic_nonexhaust.value],
+                                'pm10_local_fraction_shipping': [forurensning_valid.data.time[hours_ahead].variables.pm10_local_fraction_shipping.value],
+                                'pm10_local_fraction_heating': [forurensning_valid.data.time[hours_ahead].variables.pm10_local_fraction_heating.value],
+                                'pm10_local_fraction_industry': [forurensning_valid.data.time[hours_ahead].variables.pm10_local_fraction_industry.value],
+                                #pm25
+                                'pm25_concentration': [forurensning_valid.data.time[hours_ahead].variables.pm25_concentration.value],
+                                'AQI_pm25': [forurensning_valid.data.time[hours_ahead].variables.AQI_pm25.value],
+                                'pm25_nonlocal_fraction': [forurensning_valid.data.time[hours_ahead].variables.pm25_nonlocal_fraction.value],
+                                'pm25_nonlocal_fraction_seasalt': [forurensning_valid.data.time[hours_ahead].variables.pm25_nonlocal_fraction_seasalt.value],
+                                'pm25_local_fraction_traffic_exhaust': [forurensning_valid.data.time[hours_ahead].variables.pm25_local_fraction_traffic_exhaust.value],
+                                'pm25_local_fraction_traffic_nonexhaust': [forurensning_valid.data.time[hours_ahead].variables.pm25_local_fraction_traffic_nonexhaust.value],
+                                'pm25_local_fraction_shipping': [forurensning_valid.data.time[hours_ahead].variables.pm25_local_fraction_shipping.value],
+                                'pm25_local_fraction_heating': [forurensning_valid.data.time[hours_ahead].variables.pm25_local_fraction_heating.value],
+                                'pm25_local_fraction_industry': [forurensning_valid.data.time[hours_ahead].variables.pm25_local_fraction_industry.value],
+                                #o3
+     
+                                'o3_concentration': [forurensning_valid.data.time[hours_ahead].variables.o3_concentration.value],
+                                'AQI_o3': [forurensning_valid.data.time[hours_ahead].variables.AQI_o3.value],
+                                'o3_nonlocal_fraction': [forurensning_valid.data.time[hours_ahead].variables.o3_nonlocal_fraction.value],
+                                'o3_nonlocal_fraction_seasalt': [forurensning_valid.data.time[hours_ahead].variables.o3_nonlocal_fraction_seasalt.value],
+                                'o3_local_fraction_traffic_exhaust': [forurensning_valid.data.time[hours_ahead].variables.o3_local_fraction_traffic_exhaust.value],
+                                'o3_local_fraction_traffic_nonexhaust': [forurensning_valid.data.time[hours_ahead].variables.o3_local_fraction_traffic_nonexhaust.value],
+                                'o3_local_fraction_shipping': [forurensning_valid.data.time[hours_ahead].variables.o3_local_fraction_shipping.value],
+                                'o3_local_fraction_heating': [forurensning_valid.data.time[hours_ahead].variables.o3_local_fraction_heating.value],
+                                'o3_local_fraction_industry': [forurensning_valid.data.time[hours_ahead].variables.o3_local_fraction_industry.value]
+ })
+  
