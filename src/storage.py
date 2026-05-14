@@ -3,23 +3,28 @@ import pandas as pd
 from datetime import datetime
 from pathlib import Path
 import logging
+import traceback as tb
 
 logger = logging.getLogger(__name__)
 
 
 def get_db_path():
+    """Get path to database file"""
     db_dir = Path(__file__).resolve().parent.parent / "data"
     db_dir.mkdir(exist_ok=True)
     return db_dir / "prognoser.db"
 
+
 def create_database():
-    logger.info("Lager  en database...")
+    """Create database and prognoser table if they don't exist"""
+    logger.info("Lager en database...")
     
     db_path = get_db_path()
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
-    cursor.execute("""CREATE TABLE IF NOT EXISTS prognoser (
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS prognoser (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             created_at TIMESTAMP NOT NULL,
             
@@ -86,13 +91,19 @@ def create_database():
             o3_local_fraction_shipping REAL,
             o3_local_fraction_heating REAL,
             o3_local_fraction_industry REAL,
-            UNIQUE(timestamp_vær, latitude_vær, longitude_vær))""")
+            
+            UNIQUE(timestamp_vær, latitude_vær, longitude_vær)
+        )
+    """)
+    
     conn.commit()
     conn.close()
     
-    logger.info(f" Databasen klar på {db_path}")
+    logger.info(f"✅ Databasen klar på {db_path}")
+
 
 def insert_forecast(inserted_dataframe):
+    """Save forecast DataFrame to database"""
     logger.info("Lagrer prognose til database...")
     
     if inserted_dataframe is None or inserted_dataframe.empty:
@@ -103,20 +114,27 @@ def insert_forecast(inserted_dataframe):
     conn = sqlite3.connect(db_path)
     
     try:
-        # Legg til timestamp
+        # Add timestamp
         df = inserted_dataframe.copy()
         df['created_at'] = datetime.now().isoformat()
-        # Bruk hele prossessert dataframe
-        df_to_save = df
-        # Lag i database
-        df_to_save.to_sql('prognoser', conn, if_exists='append', index=False)
         
-        logger.info(f"✅ Lagret {len(df_to_save)} prognose(r) til database")
+        # Convert NaN to None for SQLite compatibility
+        df = df.where(pd.notna(df), None)
         
-    except sqlite3.IntegrityError:
-        logger.warning("Prognose finnes allerede (duplikat), hoppet over")
+        # Save to database
+        df.to_sql('prognoser', conn, if_exists='append', index=False)
+        
+        logger.info(f"✅ Lagret {len(df)} prognose(r) til database")
+        
     except Exception as e:
-        logger.error(f"Kunne ikke lagre: {e}")
-        raise
+        # Get full error chain
+        full_error = tb.format_exc()
+        
+        # Check if UNIQUE constraint violation (duplicate)
+        if 'UNIQUE constraint failed' in full_error or 'UNIQUE constraint' in str(e):
+            logger.warning("⚠️ Prognose finnes allerede (duplikat), hoppet over")
+        else:
+            logger.error(f"❌ Database feil: {e}")
+            raise
     finally:
         conn.close()
