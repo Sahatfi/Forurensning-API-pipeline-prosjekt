@@ -14,18 +14,14 @@ if __name__ == '__main__':
     logger.info("Starting main...")
     
     # Run pipeline
-    vær_df, forurensning_df, merged_df = run_pipeline()
+    database = run_pipeline()
     
     # Check if successful
-    if merged_df is not None:
+    if database is not None:
         print("\n" + "="*60)
         print("SUCCESS - Pipeline completed!")
         print("="*60)
-        print(f"\nMerged data shape: {merged_df.shape}")
-        print(f"\nFirst few columns: {list(merged_df.columns[:5])}")
-        print(f"\nData preview:")
-        print(merged_df.head())
-    else:
+
         print("\n" + "="*60)
         print("FAILED - Pipeline returned no data")
         print("="*60)

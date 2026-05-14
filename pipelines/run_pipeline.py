@@ -1,10 +1,12 @@
 from src.data_loader import load_config, param_config_forecast, load_data, param_config_forurensning, forurensning_loading
 from src.modeling import Data, ForurensningsModel
 from src.data_processor import process_weather_data, process_airquality_data, merge_forecasts
+from src.storage import get_db_path, create_database, insert_forecast
 import json
 import requests
 from pydantic import ValidationError
 import logging
+
 
 logger = logging.getLogger(__name__)
 def run_pipeline():
@@ -75,4 +77,11 @@ def run_pipeline():
     #Slå sammen dataframes
     merged_df = merge_forecasts(vær_df, forurensning_df)
     logger.info("Pipeline fullført")
-    return vær_df, forurensning_df, merged_df
+
+    #Laging av database:
+    get_db_path()
+    create_database()
+    #Inserting dataframe 
+    insert_forecast(merged_df)
+
+    return merged_df
