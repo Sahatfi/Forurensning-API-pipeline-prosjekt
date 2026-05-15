@@ -11,6 +11,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        
+      - name: Download previos database
+        uses: actions/download-artifact@v4
+        with:
+          name: weather- database
+          path: data/
+          continue on error: true
       
       - name: Create config file
         run: |
@@ -38,9 +45,38 @@ jobs:
         run: |
           uv sync
 
+      - name: Check database before pipeline
+      run: |
+          if [ -f data/prognoser.db ]; then
+            echo "✅ Database exists!"
+            ls -lh data/prognoser.db
+            uv run python -c "import sqlite3; conn = sqlite3.connect('data/prognoser.db'); cursor = conn.cursor(); cursor.execute('SELECT COUNT(*) FROM prognoser'); print(f'Rows before: {cursor.fetchone()[0]}'); conn.close()"
+          else
+            echo "⚠️ No database found - will create new one"
+          fi
+
       - name: Run pipeline
         run: |
           uv run python main.py
+          
+      - name: Check database after pipeline
+        run: |
+          if [ -f data/prognoser.db ]; then
+            echo "✅ Database exists after pipeline!"
+            ls -lh data/prognoser.db
+            uv run python -c "import sqlite3; conn = sqlite3.connect('data/prognoser.db'); cursor = conn.cursor(); cursor.execute('SELECT COUNT(*) FROM prognoser'); print(f'Rows after: {cursor.fetchone()[0]}'); conn.close()"
+          else
+            echo "❌ ERROR: No database created!"
+            exit 1
+          fi
+          
+      - name: Upload database artifact
+        uses: actions.upload-artifact@v4
+        with:
+            name: Vær og forurensninsdatabase
+            path: data/prognoser.db
+            retention days: 100
+        
 
 
     
