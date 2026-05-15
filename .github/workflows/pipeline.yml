@@ -17,7 +17,7 @@ jobs:
         with:
           name: weather-pollution-database
           path: data/
-        continue-on-error: true  # Flyttet ut av 'with' og fikset bindestrek
+        continue-on-error: true  
       
       - name: Create config file
         run: |
@@ -26,7 +26,7 @@ jobs:
           ${{ secrets.CONFIG_YAML }}
           EOF
       
-      - name: Verify config created (debug)
+      - name: Verify config created
         run: |
           echo "Config file exists:"
           ls -la config/
