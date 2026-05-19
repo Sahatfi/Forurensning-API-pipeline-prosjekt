@@ -71,9 +71,9 @@ jobs:
           fi
           
       - name: Upload database artifact
-        uses: actions/upload-artifact@v4  # Fikset fra punktum til skråstrek
+        uses: actions/upload-artifact@v4
         with:
-          name: weather-pollution-database  # Matcher nå download-navnet helt nøyaktig
+          name: weather-pollution-database
           path: data/prognoser.db
           retention-days: 90
 
