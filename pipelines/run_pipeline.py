@@ -23,7 +23,7 @@ def run_pipeline():
         vær_data = load_data(url, headers, params)
     except requests.exceptions.RequestException as e:
         logger.error(f"Kunne ikke hente værdata etter 5 forsøk. Feilmelding: {e}")
-        return None, None, None
+        return None
 
     # Konverter vær til BaseModel(Validering)
     try :
@@ -31,10 +31,10 @@ def run_pipeline():
         logger.info("Vær data validert!")
     except ValidationError as e: 
         logger.error(f"Vær  validering feilet: {e}")
-        return None, None, None
+        return None
     except Exception as e: 
         logger.error(f"Uforventet feil ved validating Vær  data: {e}")
-        return None, None, None
+        return None
 
     #Adjusting for parameters for data loading for forurensning
     url_foruransning, params_forurensning, headers_forurensning = param_config_forurensning(config)
@@ -42,7 +42,7 @@ def run_pipeline():
         forurensnings_data = forurensning_loading(url_foruransning, headers_forurensning, params_forurensning)
     except requests.exceptions.RequestException as e:
         logger.error(f"Kunne ikke hente forurensningsdatadata etter 5 forsøk. Feilmelding: {e}")
-        return None, None, None
+        return None
 
     # Konverter forurensning til BaseModel(Validering)
     try:
@@ -50,10 +50,10 @@ def run_pipeline():
         logger.info("Forurensningsdata validated successfully")
     except ValidationError as e: 
         logger.error(f"Forurensning validation feil: {e}")
-        return None, None, None
+        return None
     except Exception as e: 
         logger.error(f"Uforventet feil ved validering av forurensning data: {e}")
-        return None, None, None
+        return None
     
     #validating location
     #Long og Lat forurensning
