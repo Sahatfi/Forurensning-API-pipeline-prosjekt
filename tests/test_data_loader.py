@@ -6,6 +6,7 @@ import responses
 import requests
 from requests.exceptions import HTTPError
 from unittest.mock import patch, Mock
+import json
 
 #Test av config path
 def test_load_config_returns_dict():
@@ -41,5 +42,32 @@ def test_load_data_success():
     responses.add( "GET", url, json={"ok": True}, status=200)
     result = load_data(url, {}, {})
     assert result == {"ok": True}
-    
-# python -m pytest tests/test_data_loader.py
+
+@responses.activate
+def test_connect_timeout():
+    url = "http://test.com"
+    responses.add("GET", url, body=requests.exceptions.ConnectTimeout())
+    with pytest.raises(requests.exceptions.ConnectTimeout):
+        load_data(url, {}, {})
+
+@responses.activate
+def test_read_timeout():
+    url = "http://test.com"
+    responses.add("GET", url, body=requests.exceptions.ReadTimeout())
+    with pytest.raises(requests.exceptions.ReadTimeout):
+        load_data(url, {}, {})
+
+@responses.activate
+def test_exception_error():
+    url = "http://test.com"
+    responses.add("GET", url, body=requests.exceptions.RequestException())
+    with pytest.raises(requests.exceptions.RequestException):
+        load_data(url, {}, {})
+
+@responses.activate
+def test_json_error():
+    url = "http://test.com"
+    responses.add("GET", url, body="this is plain text not json", status=200)
+    with pytest.raises(json.JSONDecodeError):
+        load_data(url, {}, {})
+# python -m pytest tests/test_data_loader.py -v
