@@ -26,7 +26,7 @@ def test_happy_path_vær():
     assert validated.properties.timeseries[0].data.instant.details.wind_speed == 2.2
     assert validated.properties.timeseries[0].data.instant.details.wind_from_direction == 225.0
 
-def test_location_ist_vær():
+def test_location_list_vær():
     mock_json = {'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [18.9556, 69.651, 9]}, 
                  'properties': {'meta': {'updated_at': '2026-05-20T14:28:00Z', ''
                  'units': {'air_pressure_at_sea_level': 'hPa', 
@@ -52,6 +52,24 @@ def test_location_ist_vær():
     assert validated.geometry.coordinates.lat == 69.651
     assert validated.geometry.coordinates.alt == 9
 
+def test_location_ist_vær():
+    invalid_data = {'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': ['mockedcoordinates']}, 
+                 'properties': {'meta': {'updated_at': '2026-05-20T14:28:00Z', ''
+                 'units': {'air_pressure_at_sea_level': 'hPa', 
+                           'air_temperature': 'celsius', 'cloud_area_fraction': '%', 
+                           'precipitation_amount': 'mm', 'relative_humidity': '%', 
+                           'wind_from_direction': 'degrees'}}}}
+    invalid_data2 = {'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [3, 8, 5]}, 
+                 'properties': {'meta': {'updated_at': '2026-05-20T14:28:00Z', ''
+                 'units': {'air_pressure_at_sea_level': 'hPa', 
+                           'air_temperature': 'celsius', 'cloud_area_fraction': '%', 
+                           'precipitation_amount': 'mm', 'relative_humidity': '%', 
+                           'wind_from_direction': 'degrees'}}}}
+    with pytest.raises(IndexError):
+        Data(**invalid_data)
+        
+    with pytest.raises(ValidationError):
+        Data(**invalid_data2)
 
 
 #Forurensningstester:
