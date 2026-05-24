@@ -137,8 +137,8 @@ class ForurensningsLokasjon(BaseModel):
     # dataset -> meta -> location (['name', 'path', 'areacode', 'longitude', 'latitude', 'areaclass', 'superareacode']))
     path : str
     name : str | None = None
-    longitude : float | None = None
-    latitude : float | None = None
+    longitude : float
+    latitude : float
     
 
 class  ForurensningsMeta(BaseModel):
@@ -146,7 +146,5 @@ class  ForurensningsMeta(BaseModel):
     location : ForurensningsLokasjon | None = None
 
 class ForurensningsModel(BaseModel):
-    meta : ForurensningsMeta | None = None
-    data : ForurensningsData | None = None
-
-
+    meta : ForurensningsMeta 
+    data : ForurensningsData 
