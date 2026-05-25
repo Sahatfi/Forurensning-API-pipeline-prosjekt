@@ -87,44 +87,29 @@ import sqlite3
 import pytest
 from pydantic import ValidationError
 
-def test_happy_path_vær():
-    mock_json = {'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [18.9556, 69.651, 9]},
-              'properties': {'meta': {'updated_at': '2026-05-20T14:28:00Z', 
-                                      'units': {'air_pressure_at_sea_level': 'hPa', 'air_temperature': 'celsius', 'cloud_area_fraction': '%', 'precipitation_amount': 'mm', 'relative_humidity': '%', 'wind_from_direction': 'degrees', 'wind_speed': 'm/s'}},
-                                        'timeseries': [{'time': '2026-05-20T15:00:00Z', 
-                                                        'data': 
-                                                        {'instant': 
-                                                         {'details': 
-                                                          { 'air_temperature': 2,'relative_humidity' : 3.2, 'air_pressure_at_sea_level': 1015.5, 'wind_speed' : 2.2, 'wind_from_direction': 225.0}}}}]}}
-    validated = Data(**mock_json)
-    assert validated is not None
-    assert validated.properties.timeseries[0].data.instant.details.air_pressure_at_sea_level == 1015.5
-    assert validated.properties.timeseries[0].data.instant.details.air_temperature == 2
-    assert validated.properties.timeseries[0].data.instant.details.relative_humidity == 3.2
-    assert validated.properties.timeseries[0].data.instant.details.wind_speed == 2.2
-    assert validated.properties.timeseries[0].data.instant.details.wind_from_direction == 225.0
+# 1. Can your tests actually run?
+python -m pytest tests/test_database.py -v
 
-def test_location_ist_vær():
-    mock_json = {'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [18.9556, 69.651, 9]}, 
-                 'properties': {'meta': {'updated_at': '2026-05-20T14:28:00Z', ''
-                 'units': {'air_pressure_at_sea_level': 'hPa', 
-                           'air_temperature': 'celsius', 'cloud_area_fraction': '%', 
-                           'precipitation_amount': 'mm', 'relative_humidity': '%', 
-                           'wind_from_direction': 'degrees', 
-                           'wind_speed': 'm/s'}}, 
-                           'timeseries': [{'time': '2026-05-20T15:00:00Z', 
-                                           'data': {'instant': {'details': {'air_pressure_at_sea_level': 1015.5, 
-                                                                            'air_temperature': 11.3, 
-                                                                            'cloud_area_fraction': 100.0, 
-                                                                            'relative_humidity': 74.9, 
-                                                                            'wind_from_direction': 225.0, 
-                                                                            'wind_speed': 2.1}}, 
-                                                                            'next_12_hours': {'summary': {'symbol_code': 'lightrain'}, 'details': {}}, 
-                                                                            'next_1_hours': {'summary': {'symbol_code': 'cloudy'}, 
-                                                                                             'details': {'precipitation_amount': 0.0}}, 
-                                                                                             'next_6_hours': {'summary': {'symbol_code': 'cloudy'}, 
-                                                                                                              'details': {'precipitation_amount': 0.0}}}}]}}
-    validated = Data(**mock_json)
-    return mock_json
-x = test_happy_path_vær()
-print(x)
+# Expected: FAIL (missing imports)
+
+# 2. Does your edge case work?
+python -c "
+from src.data_loader import load_config, param_config_forecast, load_data
+from src.modeling import Data
+from src.data_processor import process_weather_data
+
+config = load_config()
+url, headers, params = param_config_forecast(config)
+vær_data = load_data(url, headers, params)
+vær_valid = Data(**vær_data)
+
+# Get last valid index
+max_index = len(vær_valid.properties.timeseries) - 1
+print(f'Timeseries length: {len(vær_valid.properties.timeseries)}')
+print(f'Trying hours_ahead={max_index} (should work)...')
+
+# This should succeed but your code rejects it
+process_weather_data(vær_valid, hours_ahead=max_index)
+"
+
+# Expected: ValueError even though it's valid
