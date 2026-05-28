@@ -7,18 +7,11 @@ on:
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Needed to commit
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
-      - name: Restore database from cache  # ← CHANGED
-        uses: actions/cache/restore@v4
-        id: cache-database
-        with:
-          path: data/prognoser.db
-          key: database-${{ github.run_number }}
-          restore-keys: |
-            database-
       
       - name: Create config file
         run: |
@@ -27,13 +20,6 @@ jobs:
           ${{ secrets.CONFIG_YAML }}
           EOF
       
-      - name: Verify config created
-        run: |
-          echo "Config file exists:"
-          ls -la config/
-          echo "Config file size:"
-          wc -l config/config.yaml
-          
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -43,39 +29,15 @@ jobs:
         uses: astral-sh/setup-uv@v3
         
       - name: Install dependencies
-        run: |
-          uv sync
-          
-      - name: Check database before pipeline
-        run: |
-          if [ -f data/prognoser.db ]; then
-            echo "✓ Database exists!"
-            ls -lh data/prognoser.db
-            uv run python -c "import sqlite3; conn = sqlite3.connect('data/prognoser.db'); cursor = conn.cursor(); cursor.execute('SELECT COUNT(*) FROM prognoser'); print(f'Rows before: {cursor.fetchone()[0]}'); conn.close()"
-          else
-            echo "No database found - will create new one"
-          fi
+        run: uv sync
           
       - name: Run pipeline
-        run: |
-          uv run python main.py
+        run: uv run python main.py
           
-      - name: Check database after pipeline
+      - name: Commit database
         run: |
-          if [ -f data/prognoser.db ]; then
-            echo "✓ Database exists after pipeline!"
-            ls -lh data/prognoser.db
-            uv run python -c "import sqlite3; conn = sqlite3.connect('data/prognoser.db'); cursor = conn.cursor(); cursor.execute('SELECT COUNT(*) FROM prognoser'); print(f'Rows after: {cursor.fetchone()[0]}'); conn.close()"
-          else
-            echo "✗ ERROR: No database created!"
-            exit 1
-          fi
-          
-      - name: Save database to cache  # ← CHANGED
-        uses: actions/cache/save@v4
-        if: always()
-        with:
-          path: data/prognoser.db
-          key: database-${{ github.run_number }}
-    
-    
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add data/prognoser.db
+          git commit -m "Update database $(date +'%Y-%m-%d')" || echo "No changes"
+          git push
