@@ -48,7 +48,7 @@ def process_weather_data(vær_valid: Data, hours_ahead: int = 10):
 
 #Forurensning dataframe
 
-def process_airquality_data(forurensning_valid: ForurensningsModel, hours_ahead : int = 10):
+def process_airquality_data(forurensning_valid: ForurensningsModel, hours_ahead : int = 6):
     timeseries_length = len(forurensning_valid.data.time)
     if hours_ahead >= timeseries_length:
         logger.error(f"Ba om {hours_ahead}t prognose, men har bare {timeseries_length}t tilgjengelig")
