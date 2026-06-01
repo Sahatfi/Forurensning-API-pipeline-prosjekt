@@ -54,6 +54,28 @@ An automated ETL pipeline that fetches weather and air-quality forecasts from th
 
 The project is inspired by my volunteer work with the Norwegian Red Cross — the goal is a data pipeline that could automate parts of the reporting work. It's part of a structured roadmap moving from data analysis toward production-ready data systems.
 
+## Architecture
+
+```mermaid
+flowchart TD
+    A["GitHub Actions<br/>daily schedule + manual trigger"] --> B["main.py<br/>entry point"]
+    B --> C["run_pipeline.py<br/>runs stages in order"]
+    C --> S1["1 · LOAD CONFIG<br/>read API settings from config.yaml"]
+    S1 --> S2["2 · EXTRACT<br/>fetch forecasts from two MET.no APIs"]
+    S2 --> S2a["Weather forecast"]
+    S2 --> S2b["Air quality forecast"]
+    S2a --> S3["3 · VALIDATE<br/>schema check with Pydantic"]
+    S2b --> S3
+    S3 --> S4{"4 · CHECK<br/>same location?"}
+    S4 -->|"No"| X["Stop · raise error"]
+    S4 -->|"Yes"| S5["5 · TRANSFORM<br/>extract relevant fields<br/>build tables<br/>merge on location"]
+    S5 --> S6["6 · LOAD<br/>store in SQLite · skip duplicates"]
+    S6 --> DB[("prognoser.db")]
+    DB --> S7["7 · PERSIST<br/>commit + push database to repo"]
+    S2 -.->|"retry x5 / network errors"| ERR["Log error<br/>exit cleanly"]
+    S3 -.->|"validation error"| ERR
+```
+
 ## What it does
 
 1. Loads configuration (API URLs, headers, params) from `config.yaml`
@@ -64,13 +86,13 @@ The project is inspired by my volunteer work with the Norwegian Red Cross — th
 6. Processes and merges the data on latitude/longitude
 7. Stores the result in a SQLite database, skipping duplicates
 
-## Architecture
+## Project structure
 
 ```
 forurensning_pipeline/
 ├── config/config.yaml        # API config (not committed)
 ├── data/prognoser.db         # SQLite output
-├── pipelines/run_pipeline.py # orchestrator
+├── pipelines/run_pipeline.py # runs the stages in order
 ├── src/
 │   ├── data_loader.py        # API requests with retry + error handling
 │   ├── modeling.py           # Pydantic schemas for both APIs
@@ -80,8 +102,6 @@ forurensning_pipeline/
 ├── main.py                   # entry point
 └── .github/workflows/        # GitHub Actions automation
 ```
-
-**Flow:** Config → Extract (2 APIs) → Validate (Pydantic) → Coordinate check → Transform → Merge → Load (SQLite)
 
 ## Key design choices
 
@@ -93,6 +113,11 @@ forurensning_pipeline/
 ## Tech stack
 
 Python · Requests · Pydantic · Tenacity · Pandas · SQLite · pytest · uv · GitHub Actions
+
+## Data sources
+
+- Air quality: https://api.met.no/weatherapi/airqualityforecast/0.1/documentation
+- Weather: https://api.met.no/weatherapi/locationforecast/2.0/documentation
 
 ## Running locally
 
