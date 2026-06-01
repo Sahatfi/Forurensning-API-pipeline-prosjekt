@@ -70,7 +70,7 @@ flowchart TD
     S4 -->|"No"| X["Stop · raise error"]
     S4 -->|"Yes"| S5["5 · TRANSFORM<br/>extract relevant fields<br/>build tables<br/>merge on location"]
     S5 --> S6["6 · LOAD<br/>store in SQLite · skip duplicates"]
-    S6 --> DB[("prognoser.db")]
+    S6 --> DB[(" Database (prognoser.db)")]
     DB --> S7["7 · PERSIST<br/>commit + push database to repo"]
     S2 -.->|"retry x5 / network errors"| ERR["Log error<br/>exit cleanly"]
     S3 -.->|"validation error"| ERR
