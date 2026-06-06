@@ -16,6 +16,13 @@ Prosjektet er inspirert av mitt frivillige arbeid i Røde Kors. Målet er å byg
 6. Behandler og slår sammen dataene på breddegrad/lengdegrad
 7. Lagrer resultatet i en SQLite-database, hopper over duplikater
 
+## Dashboard
+
+![Luftkvalitet og vær – Tromsø](images/dashboard.png)
+
+Power BI-dashboard på data fra pipelinen: daglig lufttemperatur og 
+luftkvalitetsindeks (AQI) for Tromsø, mai–juni 2026.
+
 ## Teknologier
 
 Python · Requests · Pydantic · Tenacity · Pandas · SQLite · pytest · uv · GitHub Actions
