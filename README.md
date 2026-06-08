@@ -6,6 +6,28 @@ En automatisert ETL-pipeline som henter vær- og luftkvalitetsvarsler fra Meteor
 
 Prosjektet er inspirert av mitt frivillige arbeid i Røde Kors. Målet er å bygge en datapipeline som kan automatisere deler av rapporteringsarbeidet. Det er en del av en strukturert plan for å gå fra dataanalyse til produksjonsklare datasystemer.
 
+## Arkitektur
+
+```mermaid
+flowchart TD
+    A["GitHub Actions<br/>daglig kjøring + manuell trigger"] --> B["main.py<br/>inngangspunkt"]
+    B --> C["run_pipeline.py<br/>kjører stegene i rekkefølge"]
+    C --> S1["1 · LAST KONFIG<br/>les API-innstillinger fra config.yaml"]
+    S1 --> S2["2 · HENT<br/>hent varsler fra to MET.no-APIer"]
+    S2 --> S2a["Værvarsel"]
+    S2 --> S2b["Luftkvalitetsvarsel"]
+    S2a --> S3["3 · VALIDER<br/>skjemasjekk med Pydantic"]
+    S2b --> S3
+    S3 --> S4{"4 · SJEKK<br/>samme lokasjon?"}
+    S4 -->|"Nei"| X["Stopp · kast feil"]
+    S4 -->|"Ja"| S5["5 · TRANSFORMER<br/>hent ut relevante felt<br/>bygg tabeller<br/>slå sammen på lokasjon"]
+    S5 --> S6["6 · LAGRE<br/>skriv til SQLite · hopp over duplikater"]
+    S6 --> DB[("Database (prognoser.db)")]
+    DB --> S7["7 · PERSISTER<br/>commit + push database til repo"]
+    S2 -.->|"retry x5 / nettverksfeil"| ERR["Logg feil<br/>avslutt rent"]
+    S3 -.->|"valideringsfeil"| ERR
+```
+
 ## Hva den gjør
 
 1. Laster konfigurasjon (API-URLer, headere, parametere) fra `config.yaml`
@@ -16,12 +38,35 @@ Prosjektet er inspirert av mitt frivillige arbeid i Røde Kors. Målet er å byg
 6. Behandler og slår sammen dataene på breddegrad/lengdegrad
 7. Lagrer resultatet i en SQLite-database, hopper over duplikater
 
+## Prosjektstruktur
+
+```
+forurensning_pipeline/
+├── config/config.yaml        # API-konfig (ikke committet)
+├── data/prognoser.db         # SQLite-output
+├── pipelines/run_pipeline.py # kjører stegene i rekkefølge
+├── src/
+│   ├── data_loader.py        # API-kall med retry + feilhåndtering
+│   ├── modeling.py           # Pydantic-skjemaer for begge APIer
+│   ├── data_processor.py     # transformer + slå sammen
+│   └── storage.py            # SQLite-opprettelse + inserts
+├── tests/                    # pytest enhetstester
+├── main.py                   # inngangspunkt
+└── .github/workflows/        # GitHub Actions-automatisering
+```
+
+## Sentrale designvalg
+
+- **Pydantic-validering** — begge API-svar parses til typede modeller; uventede strukturer feiler raskt med tydelige feilmeldinger i stedet for å produsere ødelagte data.
+- **Retry-logikk (Tenacity)** — API-kall prøver på nytt inntil fem ganger med eksponentiell backoff for å tåle forbigående nettverksfeil.
+- **Målrettet feilhåndtering** — timeouts, HTTP-feil, requestfeil og ugyldig JSON fanges opp og logges hver for seg.
+- **Konsistenssjekk av koordinater** — siden de to APIene spørres separat, verifiserer pipelinen at de returnerte samme lokasjon før sammenslåing.
+
 ## Dashboard
 
 ![Luftkvalitet og vær – Tromsø](images/dashboard.png)
 
-Power BI-dashboard på data fra pipelinen: daglig lufttemperatur og 
-luftkvalitetsindeks (AQI) for Tromsø, mai–juni 2026.
+Power BI-dashboard på data fra pipelinen: daglig lufttemperatur og luftkvalitetsindeks (AQI) for Tromsø, mai–juni 2026.
 
 ## Teknologier
 
@@ -41,6 +86,8 @@ uv sync                    # installer avhengigheter
 uv run python main.py      # kjør pipelinen
 ```
 
+En `config/config.yaml` kreves (holder request-konfigurasjon; ikke committet).
+
 ## Tester
 
 ```bash
@@ -49,13 +96,19 @@ uv run python -m pytest tests/ -v
 
 Testene dekker konfigurasjonslasting, API-svar (suksess og feil, mocket), feilhåndtering (timeouts, HTTP-feil, ugyldig JSON) og Pydantic-validering.
 
-## Status og videre arbeid
+## Automatisering
 
-Dette er et læringsprosjekt som demonstrerer kjernemønstre innen data engineering på liten skala (én post per kjøring). Planlagte forbedringer: automatisert rapportering, orkestrering, og håndtering av større datamengder.
+En GitHub Actions-workflow kjører pipelinen på en daglig tidsplan (og ved manuell trigger). Runneren bygger `config.yaml` på nytt fra en repository-secret, installerer avhengigheter med uv, kjører pipelinen og committer den oppdaterte databasen tilbake til repoet.
+
+Merk: GitHubs cron er best-effort, så faktiske kjøretider avviker fra måltidspunktet — et produksjonssystem ville brukt en dedikert scheduler for garantert timing.
+
+## Omfang og begrensninger
+
+Et læringsprosjekt som demonstrerer kjernemønstre innen data engineering på liten skala (én post per kjøring). Det inkluderer ikke (ennå) prosessering av store datamengder, orkestrering (Airflow/Prefect), inkrementell lasting, et sky-datavarehus, eller overvåking utover logging — dette er de naturlige neste stegene for en produksjonsversjon.
 
 ---
 
-# Forurensning & Vær Pipeline
+# Pollution & Weather Pipeline
 
 An automated ETL pipeline that fetches weather and air-quality forecasts from the Norwegian Meteorological Institute (MET.no), validates the data, merges the two sources, and stores the result in a SQLite database. Runs daily via GitHub Actions.
 
@@ -77,7 +130,7 @@ flowchart TD
     S4 -->|"No"| X["Stop · raise error"]
     S4 -->|"Yes"| S5["5 · TRANSFORM<br/>extract relevant fields<br/>build tables<br/>merge on location"]
     S5 --> S6["6 · LOAD<br/>store in SQLite · skip duplicates"]
-    S6 --> DB[(" Database (prognoser.db)")]
+    S6 --> DB[("Database (prognoser.db)")]
     DB --> S7["7 · PERSIST<br/>commit + push database to repo"]
     S2 -.->|"retry x5 / network errors"| ERR["Log error<br/>exit cleanly"]
     S3 -.->|"validation error"| ERR
@@ -117,6 +170,12 @@ forurensning_pipeline/
 - **Targeted error handling** — timeouts, HTTP errors, request failures, and malformed JSON are caught and logged distinctly.
 - **Coordinate consistency check** — since the two APIs are queried separately, the pipeline verifies they returned the same location before merging.
 
+## Dashboard
+
+![Air quality and weather – Tromsø](images/dashboard.png)
+
+Power BI dashboard on data from the pipeline: daily air temperature and air-quality index (AQI) for Tromsø, May–June 2026.
+
 ## Tech stack
 
 Python · Requests · Pydantic · Tenacity · Pandas · SQLite · pytest · uv · GitHub Actions
@@ -153,4 +212,4 @@ Note: GitHub's cron is best-effort, so actual run times drift from the target �
 
 ## Scope and limitations
 
-A learning project demonstrating core data-engineering patterns on a small scale. It does not (yet) include large-scale processing, orchestration (Airflow/Prefect), incremental loading, a cloud warehouse, or monitoring beyond logging — these are the natural next steps for a production version.
+A learning project demonstrating core data-engineering patterns on a small scale (one record per run). It does not (yet) include large-scale processing, orchestration (Airflow/Prefect), incremental loading, a cloud warehouse, or monitoring beyond logging — these are the natural next steps for a production version.
