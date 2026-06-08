@@ -1,32 +1,33 @@
-# Forurensning & Vær Pipeline
+# Forurensning & Vær Pipeline / Pollution & Weather Pipeline
 
 *(English version below / Engelsk versjon nedenfor)*
 
 En automatisert ETL-pipeline som henter vær- og luftkvalitetsvarsler fra Meteorologisk institutt (MET.no), validerer dataene, slår sammen de to kildene og lagrer resultatet i en SQLite-database. Kjører daglig via GitHub Actions.
 
-Prosjektet er inspirert av mitt frivillige arbeid i Røde Kors. Målet er å bygge en datapipeline som kan automatisere deler av rapporteringsarbeidet. Det er en del av en strukturert plan for å gå fra dataanalyse til produksjonsklare datasystemer.
+Prosjektet er inspirert av mitt frivillige arbeid i Røde Kors. Målet er å bygge en datapipeline som kan automatisere deler av rapporteringsarbeidet.
 
 ## Arkitektur
 
 ```mermaid
 flowchart TD
-    A["GitHub Actions<br/>daglig kjøring + manuell trigger"] --> B["main.py<br/>inngangspunkt"]
-    B --> C["run_pipeline.py<br/>kjører stegene i rekkefølge"]
-    C --> S1["1 · LAST KONFIG<br/>les API-innstillinger fra config.yaml"]
-    S1 --> S2["2 · HENT<br/>hent varsler fra to MET.no-APIer"]
-    S2 --> S2a["Værvarsel"]
-    S2 --> S2b["Luftkvalitetsvarsel"]
-    S2a --> S3["3 · VALIDER<br/>skjemasjekk med Pydantic"]
+    A["GitHub Actions<br/>daily schedule + manual trigger"] --> B["main.py<br/>entry point"]
+    B --> C["run_pipeline.py<br/>runs stages in order"]
+    C --> S1["1 · LOAD CONFIG<br/>read API settings from config.yaml"]
+    S1 --> S2["2 · EXTRACT<br/>fetch forecasts from two MET.no APIs"]
+    S2 --> S2a["Weather forecast"]
+    S2 --> S2b["Air quality forecast"]
+    S2a --> S3["3 · VALIDATE<br/>schema check with Pydantic"]
     S2b --> S3
-    S3 --> S4{"4 · SJEKK<br/>samme lokasjon?"}
-    S4 -->|"Nei"| X["Stopp · kast feil"]
-    S4 -->|"Ja"| S5["5 · TRANSFORMER<br/>hent ut relevante felt<br/>bygg tabeller<br/>slå sammen på lokasjon"]
-    S5 --> S6["6 · LAGRE<br/>skriv til SQLite · hopp over duplikater"]
+    S3 --> S4{"4 · CHECK<br/>same location?"}
+    S4 -->|"No"| X["Stop · raise error"]
+    S4 -->|"Yes"| S5["5 · TRANSFORM<br/>extract relevant fields<br/>build tables<br/>merge on location"]
+    S5 --> S6["6 · LOAD<br/>store in SQLite · skip duplicates"]
     S6 --> DB[("Database (prognoser.db)")]
-    DB --> S7["7 · PERSISTER<br/>commit + push database til repo"]
-    S2 -.->|"retry x5 / nettverksfeil"| ERR["Logg feil<br/>avslutt rent"]
-    S3 -.->|"valideringsfeil"| ERR
-```
+    DB --> S7["7 · PERSIST<br/>commit + push database to repo"]
+    S2 -.->|"retry x5 / network errors"| ERR["Log error<br/>exit cleanly"]
+    S3 -.->|"validation error"| ERR
+
+Pipelinen kjøres av GitHub Actions (daglig tidsplan + manuell trigger): `main.py` → `run_pipeline.py` kjører stegene i rekkefølge — last konfig, hent fra de to MET.no-APIene, valider med Pydantic, sjekk at begge kildene gjelder samme lokasjon, transformer og slå sammen, lagre til SQLite (hopp over duplikater), og commit databasen tilbake til repoet. Ved nettverks- eller valideringsfeil logges feilen og pipelinen avsluttes rent. Se arkitekturdiagrammet i den engelske seksjonen nedenfor.
 
 ## Hva den gjør
 
@@ -61,6 +62,7 @@ forurensning_pipeline/
 - **Retry-logikk (Tenacity)** — API-kall prøver på nytt inntil fem ganger med eksponentiell backoff for å tåle forbigående nettverksfeil.
 - **Målrettet feilhåndtering** — timeouts, HTTP-feil, requestfeil og ugyldig JSON fanges opp og logges hver for seg.
 - **Konsistenssjekk av koordinater** — siden de to APIene spørres separat, verifiserer pipelinen at de returnerte samme lokasjon før sammenslåing.
+- **Duplikathåndtering** — en `UNIQUE(timestamp, latitude, longitude)`-constraint hindrer dupliserte rader; ved et duplikat fanges `IntegrityError` og raden hoppes over, mens enhver annen feil re-raises.
 
 ## Dashboard
 
@@ -94,7 +96,7 @@ En `config/config.yaml` kreves (holder request-konfigurasjon; ikke committet).
 uv run python -m pytest tests/ -v
 ```
 
-Testene dekker konfigurasjonslasting, API-svar (suksess og feil, mocket), feilhåndtering (timeouts, HTTP-feil, ugyldig JSON) og Pydantic-validering.
+Testene dekker konfigurasjonslasting, API-svar (suksess og feil, mocket), feilhåndtering (timeouts, HTTP-feil, ugyldig JSON) og Pydantic-validering. API-kall er mocket (via `responses` / `unittest.mock`) slik at testene kjører deterministisk uten å treffe det ekte MET.no-APIet.
 
 ## Automatisering
 
@@ -112,7 +114,7 @@ Et læringsprosjekt som demonstrerer kjernemønstre innen data engineering på l
 
 An automated ETL pipeline that fetches weather and air-quality forecasts from the Norwegian Meteorological Institute (MET.no), validates the data, merges the two sources, and stores the result in a SQLite database. Runs daily via GitHub Actions.
 
-The project is inspired by my volunteer work with the Norwegian Red Cross — the goal is a data pipeline that could automate parts of the reporting work. It's part of a structured roadmap moving from data analysis toward production-ready data systems.
+The project is inspired by my volunteer work with the Norwegian Red Cross — the goal is a data pipeline that could automate parts of the reporting work.
 
 ## Architecture
 
@@ -169,12 +171,13 @@ forurensning_pipeline/
 - **Retry logic (Tenacity)** — API calls retry up to five times with exponential backoff to survive transient network failures.
 - **Targeted error handling** — timeouts, HTTP errors, request failures, and malformed JSON are caught and logged distinctly.
 - **Coordinate consistency check** — since the two APIs are queried separately, the pipeline verifies they returned the same location before merging.
+- **Duplicate handling** — a `UNIQUE(timestamp, latitude, longitude)` constraint prevents duplicate rows; on a duplicate insert the `IntegrityError` is caught and the row is skipped, while any other error is re-raised.
 
 ## Dashboard
 
 ![Air quality and weather – Tromsø](images/dashboard.png)
 
-Power BI dashboard on data from the pipeline: daily air temperature and air-quality index (AQI) for Tromsø, May–June 2026.
+Power BI dashboard built on data from the pipeline: daily air temperature and air-quality index (AQI) for Tromsø, May–June 2026.
 
 ## Tech stack
 
@@ -202,7 +205,7 @@ A `config/config.yaml` is required (holds request configuration; not committed).
 uv run python -m pytest tests/ -v
 ```
 
-Covers config loading, mocked API success/failure responses, all handled error types, and Pydantic model validation.
+Covers config loading, mocked API success/failure responses, all handled error types, and Pydantic model validation. API calls are mocked (via the `responses` library / `unittest.mock`) so tests run deterministically without hitting the live MET.no API.
 
 ## Automation
 
