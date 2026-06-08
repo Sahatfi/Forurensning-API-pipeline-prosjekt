@@ -26,6 +26,7 @@ flowchart TD
     DB --> S7["7 · PERSIST<br/>commit + push database to repo"]
     S2 -.->|"retry x5 / network errors"| ERR["Log error<br/>exit cleanly"]
     S3 -.->|"validation error"| ERR
+```
 
 Pipelinen kjøres av GitHub Actions (daglig tidsplan + manuell trigger): `main.py` → `run_pipeline.py` kjører stegene i rekkefølge — last konfig, hent fra de to MET.no-APIene, valider med Pydantic, sjekk at begge kildene gjelder samme lokasjon, transformer og slå sammen, lagre til SQLite (hopp over duplikater), og commit databasen tilbake til repoet. Ved nettverks- eller valideringsfeil logges feilen og pipelinen avsluttes rent. Se arkitekturdiagrammet i den engelske seksjonen nedenfor.
 
